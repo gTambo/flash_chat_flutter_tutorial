@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class RegistrationScreen extends StatefulWidget {
+  static const id = 'registration';
+
   @override
   _RegistrationScreenState createState() => _RegistrationScreenState();
 }
@@ -29,6 +31,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               },
               decoration: InputDecoration(
                 hintText: 'Enter your email',
+                hintStyle: TextStyle(color: Colors.grey[600]),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
                 border: OutlineInputBorder(
@@ -53,6 +56,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               },
               decoration: InputDecoration(
                 hintText: 'Enter your password',
+                hintStyle: TextStyle(color: Colors.grey[600]),
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
                 border: OutlineInputBorder(
