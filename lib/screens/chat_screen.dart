@@ -24,10 +24,27 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  // void getMessages() async {
+  //   final messages = await _db.collection('messages').get().then((event) {
+  //     for (var doc in event.docs) {
+  //       print('${doc.data()}');
+  //     }
+  //   });
+  // }
+
+  void messagesStream() async {
+    await for (var snapshot in _db.collection('messages').snapshots()) {
+      for (var message in snapshot.docs) {
+        print(message.data());
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     getCurrentUser();
+    // getMessages();
   }
 
   @override
@@ -39,8 +56,9 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: Icon(Icons.close),
               onPressed: () async {
-                await _auth.signOut();
-                Navigator.pop(context);
+                messagesStream();
+                // await _auth.signOut();
+                // Navigator.pop(context);
               }),
         ],
         title: Text('⚡️Chat'),
