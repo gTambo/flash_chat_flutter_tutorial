@@ -2,7 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flash_chat/constants.dart';
-import 'package:flash_chat/components/message_stream.dart';
+import 'package:flash_chat/components/message_bubble.dart';
+// import 'package:flash_chat/components/message_stream.dart';
+
+final _db = FirebaseFirestore.instance;
+late User loggedInUser;
 
 class ChatScreen extends StatefulWidget {
   static const id = 'chat';
@@ -13,9 +17,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final messageTextController = TextEditingController();
   final _auth = FirebaseAuth.instance;
-  final _db = FirebaseFirestore.instance;
-  User? loggedInUser;
-  String? messageText;
+  late String messageText;
 
   void getCurrentUser() async {
     _auth.authStateChanges().listen((User? user)
@@ -23,7 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
         {
       if (user != null) {
         loggedInUser = user;
-        print('Email: ${loggedInUser?.email}');
+        print('Email: ${loggedInUser.email}');
       }
     });
   }
@@ -65,9 +67,9 @@ class _ChatScreenState extends State<ChatScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             MessageStream(
-              db: _db,
-              currentUser: loggedInUser,
-            ),
+                // db: _db,
+                // currentUser: loggedInUser,
+                ),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
@@ -87,7 +89,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       messageTextController.clear();
                       _db.collection('messages').add({
                         'text': messageText,
-                        'sender': loggedInUser?.email,
+                        'sender': loggedInUser.email,
                       });
                     },
                     child: Text(
@@ -101,6 +103,45 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class MessageStream extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(
+            child: CircularProgressIndicator(
+              backgroundColor: Colors.lightBlueAccent,
+            ),
+          );
+        }
+        final messages = snapshot.data!.docs.reversed;
+        List<MessageBubble> messageBubbles = [];
+        for (var message in messages) {
+          Map<String, dynamic> data = message.data()! as Map<String, dynamic>;
+          final messageText = data['text'];
+          final messageSender = data['sender'];
+          final currentUserEmail = loggedInUser.email;
+          final messageBubble = MessageBubble(
+            sender: messageSender,
+            text: messageText,
+            isMe: currentUserEmail == messageSender,
+          );
+          messageBubbles.add(messageBubble);
+        }
+        return Expanded(
+          child: ListView(
+            reverse: true,
+            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+            children: messageBubbles,
+          ),
+        );
+      },
+      stream: _db.collection('messages').snapshots(),
     );
   }
 }
