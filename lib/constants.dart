@@ -51,3 +51,15 @@ const kLogTextFieldDecoration = InputDecoration(
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
   ),
 );
+
+const myBorderRadius = BorderRadius.only(
+  topLeft: Radius.circular(25),
+  bottomLeft: Radius.circular(25),
+  bottomRight: Radius.circular(25),
+);
+
+const theirBorderRadius = BorderRadius.only(
+  topRight: Radius.circular(25),
+  bottomLeft: Radius.circular(25),
+  bottomRight: Radius.circular(25),
+);
