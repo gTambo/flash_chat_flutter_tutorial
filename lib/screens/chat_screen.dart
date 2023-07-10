@@ -30,18 +30,9 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  void messagesStream() async {
-    await for (var snapshot in _db.collection('messages').snapshots()) {
-      for (var message in snapshot.docs) {
-        print(message.data());
-      }
-    }
-  }
-
   @override
   void initState() {
     getCurrentUser();
-    messagesStream();
     super.initState();
   }
 
@@ -90,6 +81,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       _db.collection('messages').add({
                         'text': messageText,
                         'sender': loggedInUser.email,
+                        'timestamp': Timestamp.now(),
                       });
                     },
                     child: Text(
@@ -119,7 +111,7 @@ class MessageStream extends StatelessWidget {
             ),
           );
         }
-        final messages = snapshot.data!.docs.reversed;
+        final messages = snapshot.data!.docs;
         List<MessageBubble> messageBubbles = [];
         for (var message in messages) {
           Map<String, dynamic> data = message.data()! as Map<String, dynamic>;
@@ -141,7 +133,10 @@ class MessageStream extends StatelessWidget {
           ),
         );
       },
-      stream: _db.collection('messages').snapshots(),
+      stream: _db
+          .collection('messages')
+          .orderBy('timestamp', descending: true)
+          .snapshots(),
     );
   }
 }
